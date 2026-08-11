@@ -1,34 +1,31 @@
-version: "3.9"
+name: CI/CD Pipeline
 
-services:
-  app:
-    build: .
-    ports:
-      - "3001:3000"
+on:
+  push:
+    branches: [main]
 
-    environment:
-      - DATABASE_URL=postgres://pinovx:pinovx_pass@db:5432/pinovx_db
-      - PORT=3000
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-    depends_on:
-      - db
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    networks:
-      - pinovx-net
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
 
-  db:
-    image: postgres:15
+      - name: Install dependencies
+        run: npm ci
 
-    environment:
-      - POSTGRES_USER=pinovx
-      - POSTGRES_PASSWORD=different_pass
-      - POSTGRES_DB=pinovx_db
+      - name: Run tests
+        run: npm test
 
-    ports:
-      - "5432:5432"
-
-    networks:
-      - pinovx-net
-
-networks:
-  pinovx-net:
+      - name: Deploy to Railway
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --service backend
