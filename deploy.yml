@@ -8,9 +8,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Railway
-        run: railway up --service backend
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -19,3 +16,6 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Deploy to Railway
+        run: railway up --service backend
