@@ -3,9 +3,14 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY . .
+# copy package.json and package-lock.json first to leverage Docker cache
+COPY package*.json ./
 
 RUN npm install
+
+COPY . .
+
+RUN npm run build
 
 EXPOSE 8080
 
